@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <label>Image upload: <input type="file" id="imageUpload"> </label>
+    <label>Number of rectangles: <input type="range" min="0" max="100" id="slider"></label>
+    <label>Save: <input type="button" id="save" value="save image"></label>
+    <canvas id="before" width="595" height="842"></canvas>
+
+    <script>
+        let before = document.getElementById("before");
+        let can = before.getContext("2d");
+        let imageupload = document.getElementById("imageUpload");
+
+        let imageRatio, canvasRatio;
+
+        let slider = document.getElementById("slider");
+        let save = document.getElementById("save");
+        save.addEventListener("click", (evt) => {
+            let data = before.toDataURL();
+
+            let a = document.createElement("a");
+            a.download = "file.png";
+            a.href = data;
+            a.style.display = "none";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+        });
+
+        let sliderValue = slider.value
+        slider.addEventListener("input", (evt) => {
+
+            console.log(evt.target.value)
+
+            sliderValue = evt.target.value;
+        })
+        imageupload.addEventListener("change", (evt) => {
+
+
+            let reader = new FileReader();
+            reader.onload = (evt) => {
+                img.onload = (evt) => {
+
+
+                    imageRatio = img.width / img.height;
+                    canvasRatio = before.width / before.height;
+
+                    //    can.drawImage(img, 0, 0, before.width, before.height);
+                };
+                img.src = evt.target.result;
+            };
+
+
+            reader.readAsDataURL(evt.target.files[0])
+
+
+        });
+        let img = new Image();
+
+
+        function paint() {
+            can.clearRect(0, 0, before.width, before.height);
+            
+            let newWidth = 0;
+            let newHeight = 0;
+
+            if (imageRatio > canvasRatio) {
+                newWidth = before.width;
+                newHeight = img.height * (newWidth / img.width);
+            }
+
+            if (imageRatio < canvasRatio) {
+                newHeight = before.height;
+                newWidth = img.width * (newHeight / img.height);
+            } else {
+                newHeight = before.height;
+                newWidth = before.width;
+            }
+
+            can.drawImage(img, 0, 0, newWidth, newHeight);
+
+
+
+            let rows = before.height / sliderValue;
+            let cols = before.width / sliderValue
+            can.strokeStyle = "rgb(0,0,255)";
+            for (let y = 0; y < before.height; y += rows) {
+                for (let x = 0; x < before.width; x += cols) {
+                    can.strokeRect(x, y, cols, rows);
+                }
+            }
+
+        }
+
+        function loop() {
+            requestAnimationFrame(loop);
+            paint()
+        }
+
+        loop()
+    </script>
+</body>
+
+</html>
